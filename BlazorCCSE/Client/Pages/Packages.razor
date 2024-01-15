@@ -1,0 +1,136 @@
+﻿@page "/Packages"
+@using BlazorCCSE.Shared
+@inject HttpClient Http
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@attribute [Authorize]
+@inject NavigationManager NavigationManager
+
+<PageTitle>Packages</PageTitle>
+
+<h1>Book a Package</h1>
+
+<p>Select a tour and a hotel to book. <br/>For more infomration about each hotel and tour please visit <NavLink href="Tours">Tours</NavLink> or <NavLink href="Hotels">Hotels</NavLink> </p>
+
+@if (tours == null || hotels == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    @if (selectedHotel != null && selectedTour != null)
+    {
+        <h3>Selected Hotel : @selectedHotel.name</h3>
+        <h3>Selected Tour : @selectedTour.name</h3>
+        <button class="btn btn-primary" @onclick="() => BookPackage()">Book Package</button>
+    }
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Tour Name</th>
+                <th>Single Room Price (£)</th>
+                <th>Double Room Price (£)</th>
+                <th>Family Room Price (£)</th>
+                <th>Book</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var tour in tours)
+            {
+                <tr>
+                    <td>@tour.name</td>
+                    <td>@tour.length</td>
+                    <td>@tour.cost</td>
+                    <td>@tour.spaces</td>
+                    @if (selectedTour != null && selectedTour.id == tour.id)
+                    {
+                        <td><button class="btn btn-primary" @onclick="() => SelectTour(tour.id)">Unselect</button></td>
+                    }
+                    else
+                    {
+                        <td><button class="btn btn-primary" @onclick="() => SelectTour(tour.id)">Select</button></td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Hotel Name</th>
+                <th>Single Room Price (£)</th>
+                <th>Double Room Price (£)</th>
+                <th>Family Room Price (£)</th>
+                <th>Book</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var hotel in hotels)
+            {
+                <tr>
+                    <td>@hotel.name</td>
+                    <td>@hotel.singlePrice</td>
+                    <td>@hotel.doublePrice</td>
+                    <td>@hotel.familyPrice</td>
+                    @if (selectedHotel != null && selectedHotel.id == hotel.id)
+                    {
+                        <td><button class="btn btn-primary" @onclick="() => SelectHotel(hotel.id)">Unselect</button></td>
+                    }
+                    else
+                    {
+                        <td><button class="btn btn-primary" @onclick="() => SelectHotel(hotel.id)">Select</button></td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+
+}
+
+@code {
+    private Tour[]? tours;
+    private Hotel[]? hotels;
+
+    private Tour? selectedTour;
+    private Hotel? selectedHotel;
+
+    protected override async Task OnInitializedAsync()
+    {
+        tours = await Http.GetFromJsonAsync<Tour[]>("api/Tours");
+        hotels = await Http.GetFromJsonAsync<Hotel[]>("api/Hotels");
+    }
+
+    private void SelectTour(int id)
+    {
+        if (selectedTour != null && selectedTour.id == id)
+        {
+            selectedTour = null;
+        }
+        else
+        {
+            selectedTour = tours.Where(t => t.id == id).FirstOrDefault();
+        }
+    }
+
+    private void SelectHotel(int id)
+    {
+        if (selectedHotel != null && selectedHotel.id == id)
+        {
+            selectedHotel = null;
+        }
+        else
+        {
+            selectedHotel = hotels.Where(h => h.id == id).FirstOrDefault();
+        }
+    }
+
+    private void BookPackage()
+    {
+        if (selectedTour != null && selectedHotel != null)
+        {
+            NavigationManager.NavigateTo("/bookPackage/" + selectedTour.id + "/" + selectedHotel.id);
+        }
+    }
+}

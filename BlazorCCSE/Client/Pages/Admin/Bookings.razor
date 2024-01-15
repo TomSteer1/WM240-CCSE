@@ -1,0 +1,85 @@
+﻿@page "/admin/Bookings"
+@inject NavigationManager NavigationManager
+@inject HttpClient Http
+@using BlazorCCSE.Shared
+
+<PageTitle>Bookings</PageTitle>
+<h1>Bookings</h1>
+<InputSelect @bind-Value="bookingType">
+    <option value="Hotel">Hotel</option>
+    <option value="Tour">Tour</option>
+    <option value="Package">Package</option>
+</InputSelect>
+@switch (bookingType)
+{
+    case BookingType.Hotel:
+        if(hotelBookings != null)
+        {
+            <table class="table">
+            <thead>
+                    <tr>
+                        <th>Hotel</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Room Type</th>
+                        <th>Customer</th>
+                        <th>Price</th
+                        <th>Deposit Paid</th>
+                        <th>Total Paid</th>
+                        <th>Balance Remaining</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (HotelBooking b in hotelBookings)
+                    {
+                        <tr>
+                            <td>@b.hotel.name</td>
+                            <td>@b.startDate.ToShortDateString()</td>
+                            <td>@b.endDate.Date.ToShortDateString()</td>
+                            <td>@b.roomType</td>
+                            <td>First Name , Last Name</td>
+                            <td>£@b.totalCost</td>
+                            <td>@b.depositPaid</td>
+                            <td>£@b.totalPaid</td>
+                            <td>£@(b.totalCost - b.totalPaid)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        break;
+    case BookingType.Tour:
+        @foreach (TourBooking b in tourBookings)
+        {
+            <p>@b.tour.name</p>
+        }
+        break;
+    case BookingType.Package:
+        @foreach (PackageBooking b in packageBookings)
+        {
+            <p>@b.hotelBooking.hotel.name</p>
+            <p>@b.tourBooking.tour.name</p>
+        }
+        break;
+    default:
+        <p>Please select a booking type</p>
+    break;
+}
+
+@code {
+    private enum BookingType
+    {
+        Hotel,
+        Tour,
+        Package
+    }
+    private BookingType bookingType = BookingType.Hotel;
+    private HotelBooking[]? hotelBookings;
+    private TourBooking[]? tourBookings;
+    private PackageBooking[]? packageBookings;
+
+    protected override async Task OnInitializedAsync()
+    {
+        hotelBookings = await Http.GetFromJsonAsync<HotelBooking[]>("api/booking/hotel/get");         
+    }
+}

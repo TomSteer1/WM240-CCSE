@@ -1,0 +1,141 @@
+﻿@page "/bookPackage"
+@page "/bookPackage/{id:int}"
+@inject NavigationManager NavigationManager
+@inject HttpClient Http
+@using BlazorCCSE.Shared
+
+@if (Id is null)
+{
+    NavigationManager.NavigateTo("/hotels");
+} else
+{
+    <PageTitle>Book Hotel</PageTitle>
+    <h1>Book a hotel</h1>
+    if (hotel is null)
+    {
+        <p><em>Loading...</em></p>
+    }else 
+    {
+       <h2>You are booking a room at @hotel!.name</h2>
+       @if(message != null)
+        {
+            <h2>@message</h2>
+        }
+       <EditForm Model="booking" OnSubmit="CheckAvailability">
+           <div>
+               <label for="StartDate">Select Start Date</label>
+                <InputDate id="StartDate" @bind-Value="booking!.startDate" @bind-Value:after="UpdateBooking"/>
+           </div>
+           <div>
+           <label for="EndDate">Select End Date</label>
+                <InputDate id="EndDate" @bind-Value="booking!.endDate" @bind-Value:after="UpdateBooking"/>
+            </div>
+            <div>
+             <label for="RoomType">Select Room Type</label>
+             <InputSelect id="RoomType" @bind-Value="booking!.roomType" @bind-Value:after="UpdateBooking">
+                <option value="singleRoom">Single Room @hotel!.singlePrice</option>
+                <option value="doubleRoom">Double Room @hotel!.doublePrice</option>
+                <option value="familyRoom">Family Room @hotel!.familyPrice</option>
+            </InputSelect>
+            </div>
+        <button type="submit" class="btn btn-primary">Check Availability</button>
+       </EditForm>
+        <h3>Nights Selected : @length</h3>
+        <h3>Total Cost: @cost</h3>
+
+        @if (bookingAvailable & aVchecked)
+        {
+            <button type="submit" class="btn btn-primary" @onclick="() => Book()">Book</button>
+        }else
+        {
+            <div>
+            @if (aVchecked)
+            {
+                <span>This booking is not available</span>
+            }else
+            {
+                <span>Please check availability</span>
+            }
+            </div>
+            <button type="submit" class="btn btn-primary" disabled>Book</button>
+        }
+    }
+}
+
+@code {
+    [Parameter]
+    public int? Id { get; set; }
+    public Hotel? hotel { get; set; }
+    public HotelBooking? booking { get; set; }
+
+    public string? message { get; set; }
+    private int length = 1;
+    public decimal cost { get; set; }
+    private bool bookingAvailable = false;
+    private bool aVchecked = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        booking = new HotelBooking
+            {
+                startDate = DateTime.Now,
+                endDate = DateTime.Now.AddDays(1),
+                roomType = RoomTypes.singleRoom
+            };
+        hotel = await Http.GetFromJsonAsync<Hotel>("api/Hotel/" + Id);
+        if (hotel is null)
+        {
+            NavigationManager.NavigateTo("/Hotels");
+        }else
+        {
+            cost = hotel.singlePrice;
+            booking = new HotelBooking
+                {
+                    hotelID = hotel.id,
+                    hotel = hotel,
+                    startDate = DateTime.Now,
+                    endDate = DateTime.Now.AddDays(1),
+                    roomType = RoomTypes.singleRoom
+                };
+        }
+    }
+
+    private void CheckAvailability()
+    {
+        aVchecked = true;
+        bookingAvailable = true;
+        message = null;
+    }
+
+    private void UpdateBooking()
+    {
+        length = booking.endDate.Subtract(booking.startDate).Days;
+        if (length <= 0)
+        {
+            booking.endDate = booking.startDate.AddDays(1);
+            message = "The end date must be after your start date";
+            length = booking.endDate.Subtract(booking.startDate).Days;
+        }
+        cost = length * hotel.GetPrice(booking.roomType);
+        Console.WriteLine(cost);
+        aVchecked = false;
+    }
+
+    private async void Book()
+    {
+        CheckAvailability();
+        message = "Your room is being booked";
+        HttpResponseMessage resp = await Http.PostAsJsonAsync<HotelBooking>("api/booking/hotel/create", booking);
+        Console.WriteLine(resp.StatusCode);
+        if (resp.StatusCode != System.Net.HttpStatusCode.OK)
+        {
+            Console.WriteLine("Setting error message");
+            message = "An error occured";
+        }else
+        {
+            message = "Your room has been booked";
+        }
+        StateHasChanged();
+        Console.WriteLine(message);
+    }
+}

@@ -1,0 +1,58 @@
+﻿@page "/Tours"
+@using BlazorCCSE.Shared
+@inject HttpClient Http
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@attribute [Authorize]
+@inject NavigationManager NavigationManager
+
+<PageTitle>Weather forecast</PageTitle>
+
+<h1>Weather forecast</h1>
+
+<p>This component demonstrates fetching data from the server.</p>
+
+@if (tours == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Tour Name</th>
+                <th>Single Room Price (£)</th>
+                <th>Double Room Price (£)</th>
+                <th>Family Room Price (£)</th>
+                <th>Book</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var tour in tours)
+            {
+                <tr>
+                    <td>@tour.name</td>
+                    <td>@tour.length</td>
+                    <td>@tour.cost</td>
+                    <td>@tour.spaces</td>
+                    <td><button class="btn btn-primary" @onclick="() => BookTour(tour.id)">Book</button></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private Tour[]? tours;
+
+    protected override async Task OnInitializedAsync()
+    {
+        tours = await Http.GetFromJsonAsync<Tour[]>("api/Tours");
+    }
+
+    private void BookTour(int id)
+    {
+        NavigationManager.NavigateTo("/bookTour/" + id);
+    }
+}

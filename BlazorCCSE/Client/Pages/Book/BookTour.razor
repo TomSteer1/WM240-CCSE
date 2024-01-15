@@ -1,0 +1,128 @@
+﻿@page "/bookTour"
+@page "/bookTour/{id:int}"
+@inject NavigationManager NavigationManager
+@inject HttpClient Http
+@using BlazorCCSE.Shared
+
+@if (Id is null)
+{
+    NavigationManager.NavigateTo("/Tours");
+} else
+{
+    <PageTitle>Book Tour</PageTitle>
+    <h1>Book a Tour</h1>
+    if (tour is null)
+    {
+        <p><em>Loading...</em></p>
+    }else 
+    {
+       <h2>You are booking a space on @tour!.name</h2>
+       <h3>The tour is @tour!.length days long</h3>
+       @if(message != null)
+        {
+            <h2>@message</h2>
+        }
+       <EditForm Model="booking" OnSubmit="CheckAvailability">
+           <div>
+               <label for="StartDate">Select Start Date</label>
+                <InputDate id="StartDate" @bind-Value="booking!.startDate" @bind-Value:after="UpdateBooking"/>
+           </div>
+           <div>
+           <label for="EndDate">Tour End Date</label>
+                <InputDate id="EndDate" @bind-Value="booking!.endDate" disabled/>
+            </div>
+        <button type="submit" class="btn btn-primary">Check Availability</button>
+       </EditForm>
+        <h3>Cost: @tour.cost</h3>
+
+        @if (bookingAvailable & aVchecked)
+        {
+            <button type="submit" class="btn btn-primary" @onclick="() => Book()">Book</button>
+        }else
+        {
+            <div>
+            @if (aVchecked)
+            {
+                <span>This booking is not available</span>
+            }else
+            {
+                <span>Please check availability</span>
+            }
+            </div>
+            <button type="submit" class="btn btn-primary" disabled>Book</button>
+        }
+    }
+}
+
+@code {
+    [Parameter]
+    public int? Id { get; set; }
+    public Tour? tour { get; set; }
+    public TourBooking? booking { get; set; }
+
+    public string? message { get; set; }
+    private bool bookingAvailable = false;
+    private bool aVchecked = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        booking = new TourBooking
+            {
+                startDate = DateTime.Now,
+                endDate = DateTime.Now.AddDays(1)
+            };
+        tour = await Http.GetFromJsonAsync<Tour>("api/Tour/" + Id);
+        if (tour is null)
+        {
+            NavigationManager.NavigateTo("/Tour");
+        }else
+        {
+            booking = new TourBooking
+                {
+                    tourID = tour.id,
+                    tour = tour,
+                    startDate = DateTime.Now,
+                    endDate = DateTime.Now.AddDays(tour.length),
+                };
+        }
+    }
+
+    private async void CheckAvailability()
+    {
+        message = "Checking availability";
+        HttpResponseMessage resp = await Http.PostAsJsonAsync<TourBooking>("api/booking/tour/check", booking);
+        if (resp.StatusCode != System.Net.HttpStatusCode.OK)
+        {
+            bookingAvailable = false;
+        }else
+        {
+            bookingAvailable = true;
+        }
+        message = null;
+        aVchecked = true;
+        StateHasChanged();
+    }
+
+    private void UpdateBooking()
+    {
+        booking.endDate = booking.startDate.AddDays(tour.length);
+        aVchecked = false;
+        bookingAvailable = false;
+    }
+
+    private async void Book()
+    {
+        message = "Your tour is being booked";
+        HttpResponseMessage resp = await Http.PostAsJsonAsync<TourBooking>("api/booking/tour/create", booking);
+        Console.WriteLine(resp.StatusCode);
+        if (resp.StatusCode != System.Net.HttpStatusCode.OK)
+        {
+            Console.WriteLine("Setting error message");
+            message = "An error occured";
+        }else
+        {
+            message = "Your tour has been booked";
+        }
+        StateHasChanged();
+    }
+}

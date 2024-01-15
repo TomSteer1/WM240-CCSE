@@ -1,0 +1,58 @@
+﻿@page "/hotels"
+@using BlazorCCSE.Shared
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@inject HttpClient Http
+@attribute [Authorize]
+@inject NavigationManager NavigationManager
+
+<PageTitle>Weather forecast</PageTitle>
+
+<h1>Weather forecast</h1>
+
+<p>This component demonstrates fetching data from the server.</p>
+
+@if (hotels == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Hotel Name</th>
+                <th>Single Room Price (£)</th>
+                <th>Double Room Price (£)</th>
+                <th>Family Room Price (£)</th>
+                <th>Book</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var hotel in hotels)
+            {
+                <tr>
+                    <td>@hotel.name</td>
+                    <td>@hotel.singlePrice</td>
+                    <td>@hotel.doublePrice</td>
+                    <td>@hotel.familyPrice</td>
+                    <td><button class="btn btn-primary" @onclick="() => BookHotel(hotel.id)">Book</button></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private Hotel[]? hotels;
+
+    protected override async Task OnInitializedAsync()
+    {
+        hotels = await Http.GetFromJsonAsync<Hotel[]>("api/Hotels");
+    }
+
+    private void BookHotel(int id)
+    {
+        NavigationManager.NavigateTo("/bookHotel/" + id);
+    }
+}
