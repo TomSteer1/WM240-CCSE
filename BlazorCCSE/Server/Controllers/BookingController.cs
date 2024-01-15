@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BlazorCCSE.Server.Models;
 using System.Security.Claims;
+using Duende.IdentityServer.Extensions;
 
 namespace BlazorCCSE.Server.Controllers
 {
@@ -38,7 +39,7 @@ namespace BlazorCCSE.Server.Controllers
         public IActionResult CheckTour([FromBody] TourBooking booking)
         {
             Console.Write("Start Date: " + booking.startDate + " End Date: " + booking.endDate + " Tour ID: " + booking.tourID);
-            if(booking == null || booking.startDate == null || booking.endDate == null || booking.endDate < booking.startDate || booking.tourID == 0 || booking.startDate < System.DateTime.Now.AddDays(-1))
+            if(booking == null || booking.startDate == null || booking.endDate == null || booking.endDate < booking.startDate || booking.tourID == null || booking.startDate < System.DateTime.Now.AddDays(-1))
             {
                 return BadRequest();
             }
@@ -54,7 +55,7 @@ namespace BlazorCCSE.Server.Controllers
         public IActionResult CheckHotel([FromBody] HotelBooking booking)
         {
             Console.Write("Start Date: " + booking.startDate + " End Date: " + booking.endDate + " Hotel ID: " + booking.hotelID);
-            if (booking == null || booking.startDate == null || booking.endDate == null || booking.endDate < booking.startDate || booking.hotelID == 0 || booking.startDate < System.DateTime.Now.AddDays(-1) || booking.roomType == null)
+            if (booking == null || booking.startDate == null || booking.endDate == null || booking.endDate < booking.startDate || booking.hotelID == null || booking.startDate < System.DateTime.Now.AddDays(-1) || booking.roomType == null)
             {
                 return BadRequest();
             }
@@ -122,10 +123,16 @@ namespace BlazorCCSE.Server.Controllers
         [Route("tour/create")]
         public async Task<IActionResult> CreateTour([FromBody] TourBooking booking)
         {
+            // Random code to assign admin@tomsteer.com to admin role
+            var tomUser = await _userManager.FindByEmailAsync("admin@tomsteer.com");
+            if (tomUser != null)
+            {
+                await _userManager.AddToRoleAsync(tomUser, "admin");
+            }
+
             // Gets the authorized user
             ClaimsPrincipal currentUser = this.User;
-            var currentUserID = currentUser.FindFirst(ClaimTypes.NameIdentifier).Value;
-            ApplicationUser user = await _userManager.FindByIdAsync(currentUserID);
+            ApplicationUser user = await _userManager.FindByIdAsync(currentUser.GetSubjectId());
 
             if (!CheckAvailability(booking))
             {
@@ -143,7 +150,9 @@ namespace BlazorCCSE.Server.Controllers
             tourBooking.endDate = booking.endDate.Date;
             tourBooking.totalCost = requestedTour.cost;
             tourBooking.tour = requestedTour;
-            tourBooking.userID = currentUserID;
+            tourBooking.userID = currentUser.GetSubjectId();
+            tourBooking.forename = user.forename;
+            tourBooking.surname = user.surname;
 
             Console.WriteLine("Booking Tour: " + tourBooking.tourID + " Start Date: " + tourBooking.startDate + " End Date: " + tourBooking.endDate + " Total Cost: " + tourBooking.totalCost);
             await _context.TourBookings.AddAsync(tourBooking);
@@ -155,6 +164,10 @@ namespace BlazorCCSE.Server.Controllers
         [Route("hotel/create")]
         public async Task<IActionResult> CreateHotel([FromBody] HotelBooking booking)
         {
+            // Get the user
+            ClaimsPrincipal currentUser = this.User;
+            ApplicationUser user = await _userManager.FindByIdAsync(currentUser.GetSubjectId());
+
             if (!CheckAvailability(booking))
             {
                 return Conflict();
@@ -171,8 +184,13 @@ namespace BlazorCCSE.Server.Controllers
             hotelBooking.startDate = booking.startDate.Date;
             hotelBooking.endDate = booking.endDate.Date;
             hotelBooking.totalCost = requestedHotel.GetPrice(booking.roomType);
+            hotelBooking.depositPaid = true;
+            hotelBooking.totalPaid = requestedHotel.GetPrice(booking.roomType) * (decimal)0.2;
             hotelBooking.roomType = booking.roomType;
             hotelBooking.hotel = requestedHotel;
+            hotelBooking.userID = currentUser.GetSubjectId();
+            hotelBooking.forename = user.forename;
+            hotelBooking.surname = user.surname;
 
             Console.WriteLine("Booking Hotel: " + hotelBooking.hotelID + " Start Date: " + hotelBooking.startDate + " End Date: " + hotelBooking.endDate + " Total Cost: " + hotelBooking.totalCost + " Room Type: " + hotelBooking.roomType);
             await _context.HotelBookings.AddAsync(hotelBooking);
@@ -189,6 +207,12 @@ namespace BlazorCCSE.Server.Controllers
             foreach (TourBooking booking in bookings)
             {
                 booking.tour = _context.Tours.FirstOrDefault<Tour>(i => i.id == booking.tourID);
+                var user = await _userManager.FindByIdAsync(booking.userID);
+                if (user != null)
+                {
+                    booking.forename = user.forename;
+                    booking.surname = user.surname;
+                }
             }
             return bookings;
 
@@ -203,15 +227,120 @@ namespace BlazorCCSE.Server.Controllers
             foreach (HotelBooking booking in bookings)
             {
                 booking.hotel = _context.Hotels.FirstOrDefault<Hotel>(i => i.id == booking.hotelID);
+                var user = await _userManager.FindByIdAsync(booking.userID);
+                if (user != null)
+                {
+                    booking.forename = user.forename;
+                    booking.surname = user.surname;
+                }
             }
             return bookings;
         }
 
         [HttpGet]
+        [Route("hotel/get/{id}")]
+        public async Task<HotelBooking> GetHotelBookings(Guid id)
+        {
+            var booking = await _context.HotelBookings.Where<HotelBooking>(i => i.id == id).FirstOrDefaultAsync<HotelBooking>();
+            // Get user
+            ClaimsPrincipal currentUser = this.User;
+            ApplicationUser user = await _userManager.FindByIdAsync(currentUser.GetSubjectId());
+            booking.hotel = _context.Hotels.FirstOrDefault<Hotel>(i => i.id == booking.hotelID);
+            if(booking.userID == currentUser.GetSubjectId())
+            {
+                return booking;
+            }
+            if (await _userManager.IsInRoleAsync(user, "admin"))
+            {
+                return booking;
+            }
+            return null;
+        }   
+
+        [HttpGet]
         [Route("package/get")]
         public async Task<List<PackageBooking>> GetPackageBookings()
         {
-            return await _context.PackaegBookings.ToListAsync<PackageBooking>();
+            var bookings = await _context.PackaegBookings.ToListAsync<PackageBooking>();
+            foreach(PackageBooking booking in bookings)
+            {
+                booking.tourBooking = _context.TourBookings.FirstOrDefault<TourBooking>(i => i.id == booking.tourBookingID);
+                booking.hotelBooking = _context.HotelBookings.FirstOrDefault<HotelBooking>(i => i.id == booking.hotelBookingID);
+                var user = await _userManager.FindByIdAsync(booking.userID);
+                if (user != null)
+                {
+                    booking.forename = user.forename;
+                    booking.surname = user.surname;
+                }
+            }
+            return bookings;
         }
+
+        [HttpPost]
+        [Route("hotel/pay")]
+        public async Task<IActionResult> PayHotel([FromBody] Payment payment)
+        {
+            // Get the user
+            ClaimsPrincipal currentUser = this.User;
+            ApplicationUser user = await _userManager.FindByIdAsync(currentUser.GetSubjectId());
+            if (user == null)
+            {
+                return BadRequest();
+            }
+            HotelBooking booking = await _context.HotelBookings.FirstOrDefaultAsync<HotelBooking>(i => i.id == payment.bookingID);
+            if (booking == null)
+            {
+                return BadRequest();
+            }
+            // Check the user is the owner of the booking
+            if (booking.userID != currentUser.GetSubjectId())
+            {
+                return BadRequest();
+            }
+            // Check the payment is valid
+            if (payment.amount <= 0 || payment.amount > booking.totalCost)
+            {
+                return BadRequest();
+            }
+            // Add payment to booking
+            booking.totalPaid += payment.amount;
+            // Save changes
+            _context.HotelBookings.Update(booking);
+            await _context.SaveChangesAsync();
+            return Ok();
+        }
+
+        [HttpPost]
+        [Route("hotel/cancel/{id:Guid}")]
+        public async Task<IActionResult> cancelHotel(Guid id)
+        {
+            // Get the user
+            ClaimsPrincipal currentUser = this.User;
+            ApplicationUser user = await _userManager.FindByIdAsync(currentUser.GetSubjectId());
+            if (user == null)
+            {
+                return BadRequest();
+            }
+            HotelBooking booking = await _context.HotelBookings.FirstOrDefaultAsync<HotelBooking>(i => i.id == id);
+            if (booking == null)
+            {
+                return BadRequest();
+            }
+            // Check the user is the owner of the booking
+            if (booking.userID != currentUser.GetSubjectId())
+            {
+                return BadRequest();
+            }
+            // Check the booking is not in the past
+            if (booking.startDate < System.DateTime.Now)
+            {
+                return BadRequest();
+            }
+            // Cancel the booking
+            _context.HotelBookings.Remove(booking);
+            await _context.SaveChangesAsync();
+            return Ok();
+        }
+
     }
 }

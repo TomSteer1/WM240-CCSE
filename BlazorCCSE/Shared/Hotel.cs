@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.SqlTypes;
 using System.Linq;
 using System.Text;
@@ -10,7 +12,9 @@ namespace BlazorCCSE.Shared
     public class Hotel
     {
         public string name { get; set; }
-        public int id { get; set; }
+        [Key]
+        [Column(TypeName ="uniqueidentifier")]
+        public Guid id { get; set; }
         public Decimal singlePrice { get; set; }
         public Decimal doublePrice { get; set; }
         public Decimal familyPrice { get; set; }

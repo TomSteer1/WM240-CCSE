@@ -1,0 +1,140 @@
+﻿@page "/bookings"
+@inject NavigationManager NavigationManager
+@inject HttpClient Http
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@attribute [Authorize]
+@using BlazorCCSE.Shared
+
+<PageTitle>Bookings</PageTitle>
+<h1>Bookings</h1>
+@if(hotelBookings != null)
+{
+    <h2>Hotel Bookings</h2>
+    <table class="table">
+    <thead>
+            <tr>
+                <th>Hotel</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Room Type</th>
+                <th>Price</th
+                <th>Deposit Paid</th>
+                <th>Total Paid</th>
+                <th>Balance Remaining</th>
+                <th>Pay</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (HotelBooking b in hotelBookings)
+            {
+                <tr>
+                    <td>@b.hotel.name</td>
+                    <td>@b.startDate.ToShortDateString()</td>
+                    <td>@b.endDate.Date.ToShortDateString()</td>
+                    <td>@b.roomType</td>
+                    <td>£@b.totalCost</td>
+                    <td>@b.depositPaid</td>
+                    <td>£@b.totalPaid</td>
+                    <td>£@(b.totalCost - b.totalPaid)</td>
+                    <td><button type="submit" class="btn btn-primary" @onclick="() => Open(b.id)">Open</button></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+@if (tourBookings != null)
+{
+    <h2>Tour Bookings</h2>
+   <table class="table">
+    <thead>
+            <tr>
+                <th>Tour</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Price</th
+                <th>Deposit Paid</th>
+                <th>Total Paid</th>
+                <th>Balance Remaining</th>
+                <th>Pay</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (TourBooking b in tourBookings)
+            {
+                <tr>
+                    <td>@b.tour.name</td>
+                    <td>@b.startDate.ToShortDateString()</td>
+                    <td>@b.endDate.Date.ToShortDateString()</td>
+                    <td>£@b.totalCost</td>
+                    <td>@b.depositPaid</td>
+                    <td>£@b.totalPaid</td>
+                    <td>£@(b.totalCost - b.totalPaid)</td>
+                    <td><button type="submit" class="btn btn-primary" @onclick="() => Open(b.id)">Open</button></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+@if (packageBookings != null)
+{
+    <h2>Package Bookings</h2>
+    <table class="table">
+    <thead>
+            <tr>
+                <th>Hotel</th>
+                <th>Tour</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Room Type</th>
+                <th>Price</th
+                <th>Deposit Paid</th>
+                <th>Total Paid</th>
+                <th>Balance Remaining</th>
+                <th>Open</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (PackageBooking b in packageBookings)
+            {
+                <tr>
+                    <td>@b.hotelBooking.hotel.name</td>
+                    <td>@b.tourBooking.tour.name</td>
+                    <td>@b.startDate.ToShortDateString()</td>
+                    <td>@b.endDate.Date.ToShortDateString()</td>
+                    <td>@b.hotelBooking.roomType</td>
+                    <td>£@b.totalCost</td>
+                    <td>@b.depositPaid</td>
+                    <td>£@b.totalPaid</td>
+                    <td>£@(b.totalCost - b.totalPaid)</td>
+                    <td><button type="submit" class="btn btn-primary" @onclick="() => Open(b.id)">Open</button></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private enum BookingType
+    {
+        Hotel,
+        Tour,
+        Package
+    }
+    private BookingType bookingType = BookingType.Hotel;
+    private HotelBooking[]? hotelBookings;
+    private TourBooking[]? tourBookings;
+    private PackageBooking[]? packageBookings;
+
+    protected override async Task OnInitializedAsync()
+    {
+        hotelBookings = await Http.GetFromJsonAsync<HotelBooking[]>("api/user/booking/hotel/get");  
+        tourBookings = await Http.GetFromJsonAsync<TourBooking[]>("api/user/booking/tour/get");
+        packageBookings = await Http.GetFromJsonAsync<PackageBooking[]>("api/user/booking/package/get");
+    }
+
+    private void Open(Guid id)
+    {
+        NavigationManager.NavigateTo("/bookings/hotel/" + id);
+    }
+}

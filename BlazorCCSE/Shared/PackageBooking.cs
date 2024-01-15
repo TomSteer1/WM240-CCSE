@@ -6,9 +6,11 @@ using System.Threading.Tasks;
 
 namespace BlazorCCSE.Shared
 {
-    public class PackageBooking : HotelBooking
+    public class PackageBooking : Booking
     {
         public HotelBooking hotelBooking;
+        public Guid hotelBookingID;
         public TourBooking tourBooking;
+        public Guid tourBookingID;
     }
 }

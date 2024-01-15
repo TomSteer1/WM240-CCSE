@@ -4,6 +4,7 @@ using BlazorCCSE.Server.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BlazorCCSE.Server.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240115065028_UserClass2")]
+    partial class UserClass2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -82,8 +85,9 @@ namespace BlazorCCSE.Server.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("passportNumber")
-                        .HasColumnType("int");
+                    b.Property<string>("passportNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("surname")
                         .IsRequired()
@@ -239,7 +243,6 @@ namespace BlazorCCSE.Server.Data.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("userID")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("id");
@@ -332,7 +335,6 @@ namespace BlazorCCSE.Server.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("userID")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("id");
@@ -512,13 +514,13 @@ namespace BlazorCCSE.Server.Data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "b607318b-6f84-4e3e-87f3-056d8b8b4016",
+                            Id = "be481383-676b-4df4-97cc-a28e9273ce49",
                             Name = "customer",
                             NormalizedName = "Customer"
                         },
                         new
                         {
-                            Id = "546d50ce-e5ef-4fff-afcd-53f32d58ca2c",
+                            Id = "d833b9e8-f985-4137-acf6-3ab380e2fa5b",
                             Name = "admin",
                             NormalizedName = "Admin"
                         });

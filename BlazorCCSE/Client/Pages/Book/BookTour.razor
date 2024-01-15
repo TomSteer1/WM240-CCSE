@@ -87,7 +87,7 @@
         }
     }
 
-    private async void CheckAvailability()
+    private async Task<bool> CheckAvailability()
     {
         message = "Checking availability";
         HttpResponseMessage resp = await Http.PostAsJsonAsync<TourBooking>("api/booking/tour/check", booking);
@@ -101,6 +101,7 @@
         message = null;
         aVchecked = true;
         StateHasChanged();
+        return bookingAvailable;
     }
 
     private void UpdateBooking()
@@ -112,6 +113,11 @@
 
     private async void Book()
     {
+        if(!await CheckAvailability())
+        {
+            message = "This booking is not available";
+            return;
+        }
         message = "Your tour is being booked";
         HttpResponseMessage resp = await Http.PostAsJsonAsync<TourBooking>("api/booking/tour/create", booking);
         Console.WriteLine(resp.StatusCode);

@@ -1,0 +1,93 @@
+﻿@page "/bookings/hotel/{id:int}"
+@inject NavigationManager NavigationManager
+@inject HttpClient Http
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using BlazorCCSE.Shared
+@attribute [Authorize]
+
+<PageTitle>View Hotel Booking</PageTitle>
+<h1>Hotel Booking</h1>
+
+@if (hotelBooking is null)
+{
+    <p><em>Loading...</em></p>  
+}else   
+{
+    <h2>@hotelBooking.hotel.name</h2>
+    <h3>Start Date: @hotelBooking.startDate.ToShortDateString()</h3>
+    <h3>End Date: @hotelBooking.endDate.Date.ToShortDateString()</h3>
+    <h3>Room Type: @hotelBooking.roomType</h3>
+    <h3>Price: £@hotelBooking.totalCost</h3>
+    <h3>Deposit Paid: @hotelBooking.depositPaid</h3>
+    <h3>Total Paid: £@hotelBooking.totalPaid</h3>
+    <h3>Balance Remaining: £@(hotelBooking.totalCost - hotelBooking.totalPaid)</h3>
+    @if (processing)
+    {
+        <p><em>Processing...</em></p>
+    }
+
+    else if(hotelBooking.totalCost - hotelBooking.totalPaid > 0)
+    {
+        <EditForm Model="payment">
+            <div>
+                <label for="CardNumber">Card Number</label>
+                <InputNumber id="CardNumber" @bind-Value="payment!.cardNumber" />
+            </div>
+            <div>
+                <label for="CVV">CVV</label>
+                <InputNumber id="CVV" @bind-Value="payment!.cvv" />
+            </div>
+            <div>
+                <label for="ExpiryMonth">Expiry Month</label>
+                <InputNumber id="ExpiryMonth" @bind-Value="payment!.expiryMonth" />
+            </div>
+            <div>
+                <label for="ExpiryYear">Expiry Year</label>
+                <InputNumber id="ExpiryYear" @bind-Value="payment!.expiryYear" />
+            </div>
+            <div>
+                <label for="Amount">Amount</label>
+                <InputNumber id="Amount" @bind-Value="payment!.amount" />
+            </div>
+        </EditForm>
+     }
+
+    <button type="submit" class="btn btn-primary" @onclick="() => Pay()">Pay</button>
+    <button type="submit" class="btn btn-primary" @onclick="() => Cancel()">Cancel</button>
+}
+
+
+@code {
+    [Parameter]
+    public int? Id { get; set; }
+    public HotelBooking? hotelBooking { get; set; }
+    public Payment payment { get; set; } = new Payment();
+    public bool processing { get; set; } = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id is null)
+        {
+            NavigationManager.NavigateTo("/bookings");
+        }
+        else
+        {
+            hotelBooking = await Http.GetFromJsonAsync<HotelBooking>($"api/booking/hotel/get/{Id}");
+        }
+    }
+
+    public async void Pay()
+    {
+        processing = true;
+        payment.bookingID = hotelBooking!.id;
+        await Http.PostAsJsonAsync<Payment>("api/booking/hotel/pay", payment);
+        hotelBooking = await Http.GetFromJsonAsync<HotelBooking>($"api/booking/hotel/get/{Id}");
+        processing = false;
+        StateHasChanged();
+    }
+
+    public void Cancel()
+    {
+    }
+}

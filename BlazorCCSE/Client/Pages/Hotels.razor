@@ -6,11 +6,9 @@
 @attribute [Authorize]
 @inject NavigationManager NavigationManager
 
-<PageTitle>Weather forecast</PageTitle>
+<PageTitle>Hotels</PageTitle>
 
-<h1>Weather forecast</h1>
-
-<p>This component demonstrates fetching data from the server.</p>
+<h1>Hotels</h1>
 
 @if (hotels == null)
 {
@@ -51,7 +49,7 @@ else
         hotels = await Http.GetFromJsonAsync<Hotel[]>("api/Hotels");
     }
 
-    private void BookHotel(int id)
+    private void BookHotel(Guid id)
     {
         NavigationManager.NavigateTo("/bookHotel/" + id);
     }

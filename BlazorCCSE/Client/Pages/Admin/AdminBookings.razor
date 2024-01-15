@@ -1,11 +1,14 @@
 ﻿@page "/admin/Bookings"
 @inject NavigationManager NavigationManager
 @inject HttpClient Http
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@attribute [Authorize(Roles="admin")]
 @using BlazorCCSE.Shared
 
 <PageTitle>Bookings</PageTitle>
 <h1>Bookings</h1>
-<InputSelect @bind-Value="bookingType">
+<InputSelect @bind-Value="bookingType" @bind-Value:after="ChangeDisplay">
     <option value="Hotel">Hotel</option>
     <option value="Tour">Tour</option>
     <option value="Package">Package</option>
@@ -37,7 +40,7 @@
                             <td>@b.startDate.ToShortDateString()</td>
                             <td>@b.endDate.Date.ToShortDateString()</td>
                             <td>@b.roomType</td>
-                            <td>First Name , Last Name</td>
+                            <td>@b.forename @b.surname</td>
                             <td>£@b.totalCost</td>
                             <td>@b.depositPaid</td>
                             <td>£@b.totalPaid</td>
@@ -46,12 +49,45 @@
                     }
                 </tbody>
             </table>
+        }else
+        {
+            <p><em>Loading...</em></p>
         }
         break;
     case BookingType.Tour:
-        @foreach (TourBooking b in tourBookings)
+        @if(tourBookings == null)
         {
-            <p>@b.tour.name</p>
+            <p><em>Loading...</em></p>
+        }else {
+            <table class="table">
+                 <thead>
+                    <tr>
+                        <th>Tour</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Customer</th>
+                        <th>Price</th
+                        <th>Deposit Paid</th>
+                        <th>Total Paid</th>
+                        <th>Balance Remaining</th>
+                    </tr>
+                </thead>
+                <tbody>                    
+                    @foreach (TourBooking b in tourBookings)
+                    {
+                        <tr>
+                            <td>@b.tour.name</td>
+                            <td>@b.startDate.ToShortDateString()</td>
+                            <td>@b.endDate.Date.ToShortDateString()</td>
+                            <td>@b.forename @b.surname</td>
+                            <td>£@b.totalCost</td>
+                            <td>@b.depositPaid</td>
+                            <td>£@b.totalPaid</td>
+                            <td>£@(b.totalCost - b.totalPaid)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
         }
         break;
     case BookingType.Package:
@@ -81,5 +117,26 @@
     protected override async Task OnInitializedAsync()
     {
         hotelBookings = await Http.GetFromJsonAsync<HotelBooking[]>("api/booking/hotel/get");         
+    }
+
+    private async void ChangeDisplay()
+    {
+        switch (bookingType)
+        {
+            case BookingType.Hotel:
+                hotelBookings = await Http.GetFromJsonAsync<HotelBooking[]>("api/booking/hotel/get");
+                StateHasChanged();
+                break;
+            case BookingType.Tour:
+                tourBookings = await Http.GetFromJsonAsync<TourBooking[]>("api/booking/tour/get");
+                StateHasChanged();
+                break;
+            case BookingType.Package:
+                packageBookings = await Http.GetFromJsonAsync<PackageBooking[]>("api/booking/package/get");
+                StateHasChanged();
+                break;
+            default:
+                break;
+        }
     }
 }

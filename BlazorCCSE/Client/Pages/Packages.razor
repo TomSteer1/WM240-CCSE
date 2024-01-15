@@ -102,7 +102,7 @@ else
         hotels = await Http.GetFromJsonAsync<Hotel[]>("api/Hotels");
     }
 
-    private void SelectTour(int id)
+    private void SelectTour(Guid id)
     {
         if (selectedTour != null && selectedTour.id == id)
         {
@@ -114,7 +114,7 @@ else
         }
     }
 
-    private void SelectHotel(int id)
+    private void SelectHotel(Guid id)
     {
         if (selectedHotel != null && selectedHotel.id == id)
         {

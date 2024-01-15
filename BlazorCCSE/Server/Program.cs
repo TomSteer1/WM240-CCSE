@@ -1,10 +1,12 @@
 using BlazorCCSE.Server.Data;
 using BlazorCCSE.Server.Models;
+using Duende.IdentityServer.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.Server.IISIntegration;
 using Microsoft.EntityFrameworkCore;
+using System.IdentityModel.Tokens.Jwt;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,14 +19,25 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = false).AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
 
-builder.Services.AddIdentityServer()
-    .AddApiAuthorization<ApplicationUser, ApplicationDbContext>();
-
 builder.Services.AddAuthentication()
     .AddIdentityServerJwt();
 
+builder.Services.AddIdentityServer()
+    .AddApiAuthorization<ApplicationUser, ApplicationDbContext>(options => {
+        options.IdentityResources["openid"].UserClaims.Add("name");
+        options.ApiResources.Single().UserClaims.Add("name");
+        options.IdentityResources["openid"].UserClaims.Add("role");
+        options.ApiResources.Single().UserClaims.Add("role");
+    });
+
+builder.Services.AddTransient<IProfileService, ProfileService>();
+
+JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Remove("role");
+
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
+
+builder.Services.AddSession();
 
 var app = builder.Build();
 
@@ -51,6 +64,7 @@ app.UseRouting();
 app.UseIdentityServer();
 app.UseAuthorization();
 app.UseAuthentication();
+app.UseSession();
 
 app.MapRazorPages();
 app.MapControllers();

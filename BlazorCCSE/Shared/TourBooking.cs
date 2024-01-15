@@ -9,7 +9,7 @@ namespace BlazorCCSE.Shared
     public class TourBooking : Booking
     {
         public Tour? tour {  get; set; }
-        public int tourID { get; set; }
+        public Guid tourID { get; set; }
 
     }
 }

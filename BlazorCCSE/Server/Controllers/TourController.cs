@@ -19,7 +19,7 @@ namespace BlazorCCSE.Server.Controllers
         }
 
         [HttpGet]
-        public async Task<Tour> GetSpecific(int id) {
+        public async Task<Tour> GetSpecific(Guid id) {
             // Pull Tours from database
             Console.WriteLine("Fetching " + id);
             return await _context.Tours.FirstOrDefaultAsync<Tour>(i => i.id == id);
