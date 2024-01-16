@@ -20,9 +20,9 @@ else
         <thead>
             <tr>
                 <th>Tour Name</th>
-                <th>Single Room Price (£)</th>
-                <th>Double Room Price (£)</th>
-                <th>Family Room Price (£)</th>
+                <th>Length</th>
+                <th>Price Per Person (£)</th>
+                <th>Max Capacity</th>
                 <th>Book</th>
             </tr>
         </thead>
@@ -49,7 +49,7 @@ else
         tours = await Http.GetFromJsonAsync<Tour[]>("api/Tours");
     }
 
-    private void BookTour(Guid id)
+    private void BookTour(string id)
     {
         NavigationManager.NavigateTo("/bookTour/" + id);
     }

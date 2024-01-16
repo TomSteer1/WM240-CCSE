@@ -1,16 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace BlazorCCSE.Shared
 {
     public class PackageBooking : Booking
     {
-        public HotelBooking hotelBooking;
-        public Guid hotelBookingID;
-        public TourBooking tourBooking;
-        public Guid tourBookingID;
+        [NotMapped]
+        public HotelBooking hotelBooking { get; set; }
+        public string hotelBookingID { get; set; }
+        [NotMapped]
+        public TourBooking tourBooking { get; set; }
+        public string tourBookingID { get; set; }
     }
 }

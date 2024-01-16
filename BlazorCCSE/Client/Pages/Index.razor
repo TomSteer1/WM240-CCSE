@@ -1,8 +1,20 @@
 ﻿@page "/"
+@inject NavigationManager NavigationManager
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Pacific Tours</PageTitle>
 
-<h1>Hello, world!</h1>
+<h1>Pacific Tours</h1>
 
-Welcome to your new app.
+<h2>Welcome to pacific tours</h2>
+<AuthorizeView>
+    <Authorized>
+        <button class='btn btn-primary' @onclick='() => NavigationManager.NavigateTo("/hotels")'>Book a Hotel</button>
+        <button class='btn btn-primary' @onclick='() => NavigationManager.NavigateTo("/tours")'>Book a Tour</button>
+        <button class='btn btn-primary' @onclick='() => NavigationManager.NavigateTo("/packages")'>Book a Package</button>
+    </Authorized>
+    <NotAuthorized>
+        <p>Please login to book a tour or hotel</p>
+        <button class='btn btn-primary' @onclick='() => NavigationManager.NavigateTo("/authentication/login")'>Login</button>
+    </NotAuthorized>
+</AuthorizeView>
 

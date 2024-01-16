@@ -10,7 +10,7 @@ namespace BlazorCCSE.Shared
     public class Tour
     {
         [Key]
-        public Guid id { get; set; } = Guid.NewGuid();
+        public string id { get; set; } = Guid.NewGuid().ToString();
         public string name { get; set; }
         public int length { get; set; }
         public int spaces { get; set; }

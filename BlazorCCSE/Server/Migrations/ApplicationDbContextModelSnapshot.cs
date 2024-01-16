@@ -4,19 +4,16 @@ using BlazorCCSE.Server.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace BlazorCCSE.Server.Data.Migrations
+namespace BlazorCCSE.Server.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240115105711_Names")]
-    partial class Names
+    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -108,11 +105,8 @@ namespace BlazorCCSE.Server.Data.Migrations
 
             modelBuilder.Entity("BlazorCCSE.Shared.Hotel", b =>
                 {
-                    b.Property<int>("id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
+                    b.Property<string>("id")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<decimal>("doublePrice")
                         .HasColumnType("decimal(18,2)");
@@ -143,7 +137,7 @@ namespace BlazorCCSE.Server.Data.Migrations
                     b.HasData(
                         new
                         {
-                            id = 1,
+                            id = "9363a9fe-7646-487c-9b43-127080cc22de",
                             doublePrice = 775m,
                             doubleRooms = 20,
                             familyPrice = 950m,
@@ -154,7 +148,7 @@ namespace BlazorCCSE.Server.Data.Migrations
                         },
                         new
                         {
-                            id = 2,
+                            id = "4a058a60-0194-440a-bec6-789c83aace75",
                             doublePrice = 500m,
                             doubleRooms = 20,
                             familyPrice = 900m,
@@ -165,7 +159,7 @@ namespace BlazorCCSE.Server.Data.Migrations
                         },
                         new
                         {
-                            id = 3,
+                            id = "c48f4729-ed7c-4e51-9520-3a3ea2ce4b0e",
                             doublePrice = 120m,
                             doubleRooms = 20,
                             familyPrice = 150m,
@@ -176,7 +170,7 @@ namespace BlazorCCSE.Server.Data.Migrations
                         },
                         new
                         {
-                            id = 4,
+                            id = "1ab8e8af-9837-43a6-abe2-cb485c6ac463",
                             doublePrice = 400m,
                             doubleRooms = 20,
                             familyPrice = 520m,
@@ -187,7 +181,7 @@ namespace BlazorCCSE.Server.Data.Migrations
                         },
                         new
                         {
-                            id = 5,
+                            id = "20b0c82c-b5d9-4851-8521-fe4b170d39b2",
                             doublePrice = 400m,
                             doubleRooms = 20,
                             familyPrice = 520m,
@@ -198,7 +192,7 @@ namespace BlazorCCSE.Server.Data.Migrations
                         },
                         new
                         {
-                            id = 6,
+                            id = "8f7538d1-c92c-4dcc-a738-27f8d2d16da9",
                             doublePrice = 100m,
                             doubleRooms = 20,
                             familyPrice = 155m,
@@ -211,15 +205,8 @@ namespace BlazorCCSE.Server.Data.Migrations
 
             modelBuilder.Entity("BlazorCCSE.Shared.HotelBooking", b =>
                 {
-                    b.Property<int>("id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
-
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<string>("id")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<bool>("depositPaid")
                         .HasColumnType("bit");
@@ -230,8 +217,15 @@ namespace BlazorCCSE.Server.Data.Migrations
                     b.Property<string>("forename")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("hotelID")
-                        .HasColumnType("int");
+                    b.Property<string>("hotelID")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("packageID")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("paymentid")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("roomType")
                         .HasColumnType("int");
@@ -255,20 +249,95 @@ namespace BlazorCCSE.Server.Data.Migrations
 
                     b.HasIndex("hotelID");
 
+                    b.HasIndex("paymentid");
+
                     b.ToTable("HotelBookings");
+                });
 
-                    b.HasDiscriminator<string>("Discriminator").HasValue("HotelBooking");
+            modelBuilder.Entity("BlazorCCSE.Shared.PackageBooking", b =>
+                {
+                    b.Property<string>("id")
+                        .HasColumnType("nvarchar(450)");
 
-                    b.UseTphMappingStrategy();
+                    b.Property<bool>("depositPaid")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("endDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("forename")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("hotelBookingID")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("paymentid")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("startDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("surname")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("totalCost")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("totalPaid")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("tourBookingID")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("userID")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("id");
+
+                    b.HasIndex("paymentid");
+
+                    b.ToTable("PackageBookings");
+                });
+
+            modelBuilder.Entity("BlazorCCSE.Shared.Payment", b =>
+                {
+                    b.Property<string>("id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<decimal>("amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("bookingID")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("cardNumber")
+                        .HasColumnType("int");
+
+                    b.Property<int>("cvv")
+                        .HasColumnType("int");
+
+                    b.Property<int>("expiryMonth")
+                        .HasColumnType("int");
+
+                    b.Property<int>("expiryYear")
+                        .HasColumnType("int");
+
+                    b.Property<string>("name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("id");
+
+                    b.ToTable("Payment");
                 });
 
             modelBuilder.Entity("BlazorCCSE.Shared.Tour", b =>
                 {
-                    b.Property<int>("id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
+                    b.Property<string>("id")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<decimal>("cost")
                         .HasColumnType("decimal(18,2)");
@@ -290,7 +359,7 @@ namespace BlazorCCSE.Server.Data.Migrations
                     b.HasData(
                         new
                         {
-                            id = 1,
+                            id = "78445f6b-da03-4937-a261-eb79310f3c60",
                             cost = 1200m,
                             length = 6,
                             name = "Real Britan",
@@ -298,7 +367,7 @@ namespace BlazorCCSE.Server.Data.Migrations
                         },
                         new
                         {
-                            id = 2,
+                            id = "cf9549e8-f08c-4a2e-a191-f37807e22a5d",
                             cost = 2000m,
                             length = 16,
                             name = "Britain and Ireland Explorer",
@@ -306,7 +375,7 @@ namespace BlazorCCSE.Server.Data.Migrations
                         },
                         new
                         {
-                            id = 3,
+                            id = "4db9756e-b58c-492a-ac62-c6fbfbddab1d",
                             cost = 2900m,
                             length = 12,
                             name = "Best of Britain",
@@ -316,11 +385,8 @@ namespace BlazorCCSE.Server.Data.Migrations
 
             modelBuilder.Entity("BlazorCCSE.Shared.TourBooking", b =>
                 {
-                    b.Property<int>("id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
+                    b.Property<string>("id")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<bool>("depositPaid")
                         .HasColumnType("bit");
@@ -330,6 +396,15 @@ namespace BlazorCCSE.Server.Data.Migrations
 
                     b.Property<string>("forename")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("packageID")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("paymentid")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("people")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("startDate")
                         .HasColumnType("datetime2");
@@ -343,13 +418,16 @@ namespace BlazorCCSE.Server.Data.Migrations
                     b.Property<decimal>("totalPaid")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("tourID")
-                        .HasColumnType("int");
+                    b.Property<string>("tourID")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("userID")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("id");
+
+                    b.HasIndex("paymentid");
 
                     b.HasIndex("tourID");
 
@@ -526,13 +604,13 @@ namespace BlazorCCSE.Server.Data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "fb6216b0-5b6a-4965-910b-95e08546c73f",
+                            Id = "6b96a7d1-50dd-40d1-a906-ceb43a5b53b0",
                             Name = "customer",
                             NormalizedName = "Customer"
                         },
                         new
                         {
-                            Id = "ab7269a8-695b-42f9-a483-8c988861bfbb",
+                            Id = "4c20511d-6e09-452f-8274-9e3c662f7b1b",
                             Name = "admin",
                             NormalizedName = "Admin"
                         });
@@ -648,13 +726,6 @@ namespace BlazorCCSE.Server.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("BlazorCCSE.Shared.PackageBooking", b =>
-                {
-                    b.HasBaseType("BlazorCCSE.Shared.HotelBooking");
-
-                    b.HasDiscriminator().HasValue("PackageBooking");
-                });
-
             modelBuilder.Entity("BlazorCCSE.Shared.HotelBooking", b =>
                 {
                     b.HasOne("BlazorCCSE.Shared.Hotel", "hotel")
@@ -663,16 +734,37 @@ namespace BlazorCCSE.Server.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("BlazorCCSE.Shared.Payment", "payment")
+                        .WithMany()
+                        .HasForeignKey("paymentid");
+
                     b.Navigation("hotel");
+
+                    b.Navigation("payment");
+                });
+
+            modelBuilder.Entity("BlazorCCSE.Shared.PackageBooking", b =>
+                {
+                    b.HasOne("BlazorCCSE.Shared.Payment", "payment")
+                        .WithMany()
+                        .HasForeignKey("paymentid");
+
+                    b.Navigation("payment");
                 });
 
             modelBuilder.Entity("BlazorCCSE.Shared.TourBooking", b =>
                 {
+                    b.HasOne("BlazorCCSE.Shared.Payment", "payment")
+                        .WithMany()
+                        .HasForeignKey("paymentid");
+
                     b.HasOne("BlazorCCSE.Shared.Tour", "tour")
                         .WithMany()
                         .HasForeignKey("tourID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("payment");
 
                     b.Navigation("tour");
                 });

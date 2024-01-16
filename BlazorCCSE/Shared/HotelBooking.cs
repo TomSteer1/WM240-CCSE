@@ -19,21 +19,8 @@ namespace BlazorCCSE.Shared
     public class HotelBooking : Booking
     {
         public Hotel hotel { get; set; } 
-        public Guid hotelID { get; set; }
+        public string hotelID { get; set; }
         public RoomTypes roomType { get; set; }
-        public string roomTypeString()
-        {
-            switch (roomType)
-            {
-                case RoomTypes.singleRoom:
-                    return "Single Room";
-                case RoomTypes.doubleRoom:
-                    return "Double Room";
-                case RoomTypes.familyRoom:
-                    return "Family Room";
-                default:
-                    return "Single Room";
-            }
-        }
+        public string? packageID {  get; set; }        
     }
 }

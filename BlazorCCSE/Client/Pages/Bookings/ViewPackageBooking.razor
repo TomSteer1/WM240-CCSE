@@ -1,4 +1,4 @@
-﻿@page "/bookings/hotel/{id}"
+﻿@page "/bookings/package/{id}"
 @inject NavigationManager NavigationManager
 @inject HttpClient Http
 @using Microsoft.AspNetCore.Authorization
@@ -6,28 +6,29 @@
 @using BlazorCCSE.Shared
 @attribute [Authorize]
 
-<PageTitle>View Hotel Booking</PageTitle>
-<h1>Hotel Booking</h1>
+<PageTitle>View Package Booking</PageTitle>
+<h1>Package Booking</h1>
 
-@if (hotelBooking is null)
+@if (packageBooking is null)
 {
     <p><em>Loading...</em></p>  
 }else   
 {
-    <h2>@hotelBooking.hotel.name</h2>
-    <h3>Start Date: @hotelBooking.startDate.ToShortDateString()</h3>
-    <h3>End Date: @hotelBooking.endDate.Date.ToShortDateString()</h3>
-    <h3>Room Type: @hotelBooking.hotel.GetRoomType(hotelBooking.roomType)</h3>
-    <h3>Price: £@hotelBooking.totalCost</h3>
-    <h3>Deposit Paid: @hotelBooking.depositPaid</h3>
-    <h3>Total Paid: £@hotelBooking.totalPaid</h3>
-    <h3>Balance Remaining: £@(hotelBooking.totalCost - hotelBooking.totalPaid)</h3>
+    <h2>Hotel : @packageBooking.hotelBooking.hotel.name</h2>
+    <h2>Tour : @packageBooking.tourBooking.tour.name</h2>
+    <h3>Start Date: @packageBooking.startDate.ToShortDateString()</h3>
+    <h3>End Date: @packageBooking.endDate.Date.ToShortDateString()</h3>
+    <h3>Room Type: @packageBooking.hotelBooking.hotel.GetRoomType(packageBooking.hotelBooking.roomType)</h3>
+    <h3>Price: £@packageBooking.totalCost</h3>
+    <h3>Deposit Paid: @packageBooking.depositPaid</h3>
+    <h3>Total Paid: £@packageBooking.totalPaid</h3>
+    <h3>Balance Remaining: £@(packageBooking.totalCost - packageBooking.totalPaid)</h3>
     @if (processing)
     {
         <p><em>Processing...</em></p>
     }
 
-    else if(hotelBooking.totalCost - hotelBooking.totalPaid > 0)
+    else if (packageBooking.totalCost - packageBooking.totalPaid > 0)
     {
         <EditForm Model="payment">
             <div>
@@ -54,7 +55,7 @@
         <button type="submit" class="btn btn-primary" @onclick="() => Pay()">Pay</button>
      }
 
-    @if (hotelBooking.startDate.Date > DateTime.Now.AddDays(5).Date)
+    @if (packageBooking.startDate.Date > DateTime.Now.AddDays(5).Date)
     {
         <button type="submit" class="btn btn-primary" @onclick="() => Cancel()">Cancel</button>
     }else
@@ -67,7 +68,7 @@
 @code {
     [Parameter]
     public string? Id { get; set; }
-    public HotelBooking? hotelBooking { get; set; }
+    public PackageBooking? packageBooking { get; set; }
     public Payment payment { get; set; } = new Payment();
     public bool processing { get; set; } = false;
 
@@ -79,16 +80,16 @@
         }
         else
         {
-            hotelBooking = await Http.GetFromJsonAsync<HotelBooking>($"api/booking/hotel/get/{Id}");
+            packageBooking = await Http.GetFromJsonAsync<PackageBooking>($"api/booking/package/get/{Id}");
         }
     }
 
     public async void Pay()
     {
         processing = true;
-        payment.bookingID = hotelBooking!.id;
-        await Http.PostAsJsonAsync<Payment>("api/booking/hotel/pay", payment);
-        hotelBooking = await Http.GetFromJsonAsync<HotelBooking>($"api/booking/hotel/get/{Id}");
+        payment.bookingID = packageBooking!.id;
+        await Http.PostAsJsonAsync<Payment>("api/booking/package/pay", payment);
+        packageBooking = await Http.GetFromJsonAsync<PackageBooking>($"api/booking/package/get/{Id}");
         processing = false;
         payment = new Payment();
         StateHasChanged();
@@ -96,7 +97,7 @@
 
     public async void Cancel()
     {
-        await Http.PostAsJsonAsync<HotelBooking>("api/booking/hotel/cancel", hotelBooking);
+        await Http.PostAsJsonAsync<PackageBooking>("api/booking/package/cancel", packageBooking);
         NavigationManager.NavigateTo("/bookings");
     }
 }

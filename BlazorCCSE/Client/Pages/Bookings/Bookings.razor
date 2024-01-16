@@ -22,7 +22,7 @@
                 <th>Deposit Paid</th>
                 <th>Total Paid</th>
                 <th>Balance Remaining</th>
-                <th>Pay</th>
+                <th>Open</th>
             </tr>
         </thead>
         <tbody>
@@ -37,7 +37,7 @@
                     <td>@b.depositPaid</td>
                     <td>£@b.totalPaid</td>
                     <td>£@(b.totalCost - b.totalPaid)</td>
-                    <td><button type="submit" class="btn btn-primary" @onclick="() => Open(b.id)">Open</button></td>
+                    <td><button type="submit" class="btn btn-primary" @onclick="() => OpenHotel(b.id)">Open</button></td>
                 </tr>
             }
         </tbody>
@@ -70,7 +70,7 @@
                     <td>@b.depositPaid</td>
                     <td>£@b.totalPaid</td>
                     <td>£@(b.totalCost - b.totalPaid)</td>
-                    <td><button type="submit" class="btn btn-primary" @onclick="() => Open(b.id)">Open</button></td>
+                    <td><button type="submit" class="btn btn-primary" @onclick="() => OpenTour(b.id)">Open</button></td>
                 </tr>
             }
         </tbody>
@@ -102,12 +102,12 @@
                     <td>@b.tourBooking.tour.name</td>
                     <td>@b.startDate.ToShortDateString()</td>
                     <td>@b.endDate.Date.ToShortDateString()</td>
-                    <td>@b.hotelBooking.roomType</td>
+                    <td>@b.hotelBooking.hotel.GetRoomType(b.hotelBooking.roomType)</td>
                     <td>£@b.totalCost</td>
                     <td>@b.depositPaid</td>
                     <td>£@b.totalPaid</td>
                     <td>£@(b.totalCost - b.totalPaid)</td>
-                    <td><button type="submit" class="btn btn-primary" @onclick="() => Open(b.id)">Open</button></td>
+                    <td><button type="submit" class="btn btn-primary" @onclick="() =>OpenPackage(b.id)">Open</button></td>
                 </tr>
             }
         </tbody>
@@ -133,8 +133,16 @@
         packageBookings = await Http.GetFromJsonAsync<PackageBooking[]>("api/user/booking/package/get");
     }
 
-    private void Open(Guid id)
+    private void OpenHotel(string id)
     {
         NavigationManager.NavigateTo("/bookings/hotel/" + id);
+    }
+    private void OpenTour(string id)
+    {
+        NavigationManager.NavigateTo("/bookings/tour/" + id);
+    }
+    private void OpenPackage(string id)
+    {
+        NavigationManager.NavigateTo("/bookings/package/" + id);
     }
 }

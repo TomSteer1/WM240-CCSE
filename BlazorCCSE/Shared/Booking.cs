@@ -11,7 +11,7 @@ namespace BlazorCCSE.Shared
     public class Booking
     {
         [Key]
-        public Guid id { get; set; } = Guid.NewGuid();
+        public string id { get; set; } = Guid.NewGuid().ToString();
         public DateTime startDate { get; set; }
         public DateTime endDate { get; set; }
         public string? forename { get; set; }

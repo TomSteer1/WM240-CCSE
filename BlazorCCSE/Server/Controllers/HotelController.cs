@@ -19,7 +19,7 @@ namespace BlazorCCSE.Server.Controllers
         }
 
         [HttpGet]
-        public async Task<Hotel> GetSpecific(Guid id) {
+        public async Task<Hotel> GetSpecific(string id) {
             // Pull hotels from database
             Console.WriteLine("Fetching " + id);
             return await _context.Hotels.FirstOrDefaultAsync<Hotel>(i => i.id == id);

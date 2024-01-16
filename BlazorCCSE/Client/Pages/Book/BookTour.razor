@@ -1,7 +1,8 @@
 ﻿@page "/bookTour"
-@page "/bookTour/{id:int}"
+@page "/bookTour/{id}"
 @inject NavigationManager NavigationManager
 @inject HttpClient Http
+@inject IJSRuntime JSRuntime
 @using BlazorCCSE.Shared
 
 @if (Id is null)
@@ -31,13 +32,36 @@
            <label for="EndDate">Tour End Date</label>
                 <InputDate id="EndDate" @bind-Value="booking!.endDate" disabled/>
             </div>
+            <div>
+                <label for="People">Number of People</label>
+                <InputNumber id="People" @bind-Value="booking!.people" @bind-Value:after="UpdateBooking"/>
+            </div>
         <button type="submit" class="btn btn-primary">Check Availability</button>
        </EditForm>
-        <h3>Cost: @tour.cost</h3>
+        <h3>Cost: @cost</h3>
 
         @if (bookingAvailable & aVchecked)
         {
-            <button type="submit" class="btn btn-primary" @onclick="() => Book()">Book</button>
+            <h4>Please pay the deposit to book your stay</h4>
+            <EditForm Model="booking.payment" OnSubmit="Book">
+                <div>
+                    <label for="CardNumber">Card Number</label>
+                    <InputText id="CardNumber" @bind-Value="booking.payment!.cardNumber" />
+                </div>
+                <div>
+                    <label for="CVV">CVV</label>
+                    <InputText id="CVV" @bind-Value="booking.payment!.cvv" />
+                </div>
+                <div>
+                    <label for="ExpiryMonth">Expiry Month</label>
+                    <InputNumber id="ExpiryMonth" @bind-Value="booking.payment!.expiryMonth" />
+                </div>
+                <div>
+                    <label for="ExpiryYear">Expiry Year</label>
+                    <InputNumber id="ExpiryYear" @bind-Value="booking.payment!.expiryYear" />
+                </div>
+                <button type="submit" class="btn btn-primary">Book</button>
+            </EditForm>
         }else
         {
             <div>
@@ -56,13 +80,14 @@
 
 @code {
     [Parameter]
-    public int? Id { get; set; }
+    public string? Id { get; set; }
     public Tour? tour { get; set; }
     public TourBooking? booking { get; set; }
 
     public string? message { get; set; }
     private bool bookingAvailable = false;
     private bool aVchecked = false;
+    private decimal cost;
 
     protected override async Task OnInitializedAsync()
     {
@@ -77,12 +102,17 @@
             NavigationManager.NavigateTo("/Tour");
         }else
         {
+            cost = tour.cost;
             booking = new TourBooking
                 {
                     tourID = tour.id,
                     tour = tour,
                     startDate = DateTime.Now,
                     endDate = DateTime.Now.AddDays(tour.length),
+                    payment = new Payment
+                    {
+                        amount = tour.cost * 0.2m
+                    }
                 };
         }
     }
@@ -93,12 +123,13 @@
         HttpResponseMessage resp = await Http.PostAsJsonAsync<TourBooking>("api/booking/tour/check", booking);
         if (resp.StatusCode != System.Net.HttpStatusCode.OK)
         {
+            message = "This booking is not available";
             bookingAvailable = false;
         }else
         {
+            message = "This booking is available";
             bookingAvailable = true;
         }
-        message = null;
         aVchecked = true;
         StateHasChanged();
         return bookingAvailable;
@@ -107,8 +138,11 @@
     private void UpdateBooking()
     {
         booking.endDate = booking.startDate.AddDays(tour.length);
+        cost = tour.cost * booking.people;
+        booking.payment.amount = cost * 0.2m;
         aVchecked = false;
         bookingAvailable = false;
+        StateHasChanged();
     }
 
     private async void Book()
@@ -118,16 +152,30 @@
             message = "This booking is not available";
             return;
         }
+        if (!booking.payment.Validate())
+        {
+            Console.WriteLine("Invalid card details");
+            message = "Please enter valid card details";
+            return;
+        }
+        Console.WriteLine(booking.payment.amount);
+        booking.payment.items = booking.payment.items.Append(new PaymentItem
+            {
+                Name = tour.name + " deposit",
+                cost = tour.cost * 0.2m,
+                quantity = booking.people
+            });
+        await JSRuntime.InvokeAsync<string>("saveFile", "receipt.txt", booking.payment.GetReceipt());
         message = "Your tour is being booked";
         HttpResponseMessage resp = await Http.PostAsJsonAsync<TourBooking>("api/booking/tour/create", booking);
-        Console.WriteLine(resp.StatusCode);
-        if (resp.StatusCode != System.Net.HttpStatusCode.OK)
+        TourBooking respBook = await resp.Content.ReadFromJsonAsync<TourBooking>();
+        if (respBook == null)
         {
-            Console.WriteLine("Setting error message");
             message = "An error occured";
         }else
         {
             message = "Your tour has been booked";
+            NavigationManager.NavigateTo("/bookings/tour/" + respBook.id);
         }
         StateHasChanged();
     }

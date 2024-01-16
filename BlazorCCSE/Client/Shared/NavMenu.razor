@@ -1,6 +1,6 @@
 ﻿<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">BlazorCCSE</a>
+        <a class="navbar-brand" href="">Pacific Tours</a>
         <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -14,28 +14,35 @@
                 <span class="oi oi-home" aria-hidden="true"></span> Home
             </NavLink>
         </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="hotels">
-                <span class="oi oi-plus" aria-hidden="true"></span> Hotels
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="tours">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Tours
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="packages">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Packages
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="bookings">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Bookings
-            </NavLink>
-        </div>
+        <AuthorizeView>
+            <Authorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="hotels">
+                        <span class="oi oi-home" aria-hidden="true"></span> Hotels
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="tours">
+                        <span class="oi oi-compass" aria-hidden="true"></span> Tours
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="packages">
+                        <span class="oi oi-box" aria-hidden="true"></span> Packages
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="bookings">
+                        <span class="oi oi-book" aria-hidden="true"></span> My Bookings
+                    </NavLink>
+                </div>
+               </Authorized>
+        </AuthorizeView>
         <AuthorizeView Roles="admin">
             <Authorized>
+                <div class="navbar-text px-3" style="color:white;">
+                    <span class="oi oi-person" aria-hidden="true"></span> Admin 
+                </div>
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="admin/bookings">
                         <span class="oi oi-book" aria-hidden="true"></span> Bookings

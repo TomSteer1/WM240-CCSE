@@ -1,8 +1,10 @@
 ﻿@page "/bookHotel"
-@page "/bookHotel/{id:int}"
+@page "/bookHotel/{id}"
 @inject NavigationManager NavigationManager
 @inject HttpClient Http
+@inject IJSRuntime JSRuntime
 @using BlazorCCSE.Shared
+@using System.Text
 
 @if (Id is null)
 {
@@ -42,28 +44,29 @@
        </EditForm>
         <h3>Nights Selected : @length</h3>
         <h3>Total Cost: @cost</h3>
+        <h3>Deposit Due Today: @(booking.payment.amount)</h3>
 
         @if (bookingAvailable & aVchecked)
         {
             <h4>Please pay the deposit to book your stay</h4>
-            <EditForm Model="payment" OnSubmit="Book">
+            <EditForm Model="booking.payment" OnSubmit="Book">
                 <div>
                     <label for="CardNumber">Card Number</label>
-                    <InputNumber id="CardNumber" @bind-Value="payment!.cardNumber" />
+                    <InputText id="CardNumber" @bind-Value="booking.payment!.cardNumber" />
                 </div>
                 <div>
                     <label for="CVV">CVV</label>
-                    <InputNumber id="CVV" @bind-Value="payment!.cvv" />
+                    <InputText id="CVV" @bind-Value="booking.payment!.cvv" />
                 </div>
                 <div>
                     <label for="ExpiryMonth">Expiry Month</label>
-                    <InputNumber id="ExpiryMonth" @bind-Value="payment!.expiryMonth" />
+                    <InputNumber id="ExpiryMonth" @bind-Value="booking.payment!.expiryMonth" />
                 </div>
                 <div>
                     <label for="ExpiryYear">Expiry Year</label>
-                    <InputNumber id="ExpiryYear" @bind-Value="payment!.expiryYear" />
+                    <InputNumber id="ExpiryYear" @bind-Value="booking.payment!.expiryYear" />
                 </div>
-                <button type="submit" class="btn btn-primary" >Book</button>
+                <button type="submit" class="btn btn-primary">Book</button>
             </EditForm>
         }else
         {
@@ -83,10 +86,9 @@
 
 @code {
     [Parameter]
-    public int? Id { get; set; }
+    public string? Id { get; set; }
     public Hotel? hotel { get; set; }
     public HotelBooking? booking { get; set; }
-    public Payment payment { get; set; } = new Payment();
 
     public string? message { get; set; }
     private int length = 1;
@@ -115,7 +117,11 @@
                     hotel = hotel,
                     startDate = DateTime.Now,
                     endDate = DateTime.Now.AddDays(1),
-                    roomType = RoomTypes.singleRoom
+                    roomType = RoomTypes.singleRoom,
+                    payment = new Payment
+                    {
+                        amount = cost * 0.2m
+                    }
                 };
         }
     }
@@ -148,6 +154,7 @@
             length = booking.endDate.Subtract(booking.startDate).Days;
         }
         cost = length * hotel.GetPrice(booking.roomType);
+        booking.payment.amount = cost * 0.2m;
         Console.WriteLine(cost);
         aVchecked = false;
     }
@@ -159,18 +166,31 @@
             message = "This booking is not available";
             return;
         }
+        if(!booking.payment.Validate())
+        {
+            Console.WriteLine("Invalid card details");
+            message = "Please enter valid card details";
+            return;
+        }
+        booking.payment.items = booking.payment.items.Append(new PaymentItem
+        {
+            Name = hotel.name + " deposit",
+            cost = booking.payment.amount
+        });
+        await JSRuntime.InvokeAsync<string>("saveFile", "receipt.txt", booking.payment.GetReceipt());
+
         message = "Your room is being booked";
         HttpResponseMessage resp = await Http.PostAsJsonAsync<HotelBooking>("api/booking/hotel/create", booking);
-        Console.WriteLine(resp.StatusCode);
-        if (resp.StatusCode != System.Net.HttpStatusCode.OK)
+        HotelBooking respBook = await resp.Content.ReadFromJsonAsync<HotelBooking>();
+        if (respBook == null)
         {
             Console.WriteLine("Setting error message");
             message = "An error occured";
         }else
         {
             message = "Your room has been booked";
+            NavigationManager.NavigateTo("/bookings/hotel/" + respBook.id);
         }
         StateHasChanged();
-        Console.WriteLine(message);
     }
 }

@@ -13,8 +13,7 @@ namespace BlazorCCSE.Shared
     {
         public string name { get; set; }
         [Key]
-        [Column(TypeName ="uniqueidentifier")]
-        public Guid id { get; set; }
+        public string id { get; set; } = Guid.NewGuid().ToString();
         public Decimal singlePrice { get; set; }
         public Decimal doublePrice { get; set; }
         public Decimal familyPrice { get; set; }
@@ -48,6 +47,20 @@ namespace BlazorCCSE.Shared
                     return familyRooms;
                 default:
                     return singleRooms;
+            }
+        }
+        public string GetRoomType(RoomTypes room)
+        {
+            switch (room)
+            {
+                case RoomTypes.singleRoom:
+                    return "Single Room";
+                case RoomTypes.doubleRoom:
+                    return "Double Room";
+                case RoomTypes.familyRoom:
+                    return "Family Room";
+                default:
+                    return "Single Room";
             }
         }
     }

@@ -49,7 +49,7 @@ else
         hotels = await Http.GetFromJsonAsync<Hotel[]>("api/Hotels");
     }
 
-    private void BookHotel(Guid id)
+    private void BookHotel(string id)
     {
         NavigationManager.NavigateTo("/bookHotel/" + id);
     }

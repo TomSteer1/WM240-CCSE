@@ -48,12 +48,17 @@ namespace BlazorCCSE.Server.Controllers
 
             // Pull bookings from database
             List<TourBooking> bookings = await _context.TourBookings.Where(i => i.userID == user.Id).ToListAsync<TourBooking>();
+            List<TourBooking> returnData = new List<TourBooking>();
             // Map tour to booking
             foreach (TourBooking booking in bookings)
             {
-                booking.tour = await _context.Tours.FirstOrDefaultAsync<Tour>(i => i.id == booking.tourID);
+                if(booking.packageID is null)
+                { 
+                    booking.tour = await _context.Tours.FirstOrDefaultAsync<Tour>(i => i.id == booking.tourID);
+                    returnData.Add(booking);
+                }
             }
-            return bookings;
+            return returnData;
         }
 
         [HttpGet]
@@ -71,12 +76,17 @@ namespace BlazorCCSE.Server.Controllers
 
             // Pull bookings from database
             List<HotelBooking> bookings = await _context.HotelBookings.Where(i => i.userID == user.Id).ToListAsync<HotelBooking>();
+            List<HotelBooking> returnData = new List<HotelBooking>();
             // Map hotel to booking
             foreach (HotelBooking booking in bookings)
             {
-                booking.hotel = await _context.Hotels.FirstOrDefaultAsync<Hotel>(i => i.id == booking.hotelID);
+                if(booking.packageID is null)
+                {
+                    booking.hotel = await _context.Hotels.FirstOrDefaultAsync<Hotel>(i => i.id == booking.hotelID);
+                    returnData.Add(booking);
+                }
             }
-            return bookings;
+            return returnData;
         }
 
         [HttpGet]
@@ -93,12 +103,14 @@ namespace BlazorCCSE.Server.Controllers
             }
 
             // Pull bookings from database
-            List<PackageBooking> bookings = await _context.PackaegBookings.Where(i => i.userID == user.Id).ToListAsync<PackageBooking>();
+            List<PackageBooking> bookings = await _context.PackageBookings.Where(i => i.userID == user.Id).ToListAsync<PackageBooking>();
             // Map tour to booking
             foreach (PackageBooking booking in bookings)
             {
                 booking.hotelBooking = await _context.HotelBookings.FirstOrDefaultAsync<HotelBooking>(i => i.id == booking.hotelBookingID);
                 booking.tourBooking = await _context.TourBookings.FirstOrDefaultAsync<TourBooking>(i => i.id == booking.tourBookingID);
+                booking.tourBooking.tour = await _context.Tours.FirstOrDefaultAsync<Tour>(i => i.id == booking.tourBooking.tourID);
+                booking.hotelBooking.hotel = await _context.Hotels.FirstOrDefaultAsync<Hotel>(i => i.id == booking.hotelBooking.hotelID);
             }
             return bookings;
         }
