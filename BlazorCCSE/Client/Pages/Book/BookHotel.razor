@@ -174,7 +174,7 @@
         }
         booking.payment.items = booking.payment.items.Append(new PaymentItem
         {
-            Name = hotel.name + " deposit",
+            name = hotel.name + " deposit",
             cost = booking.payment.amount
         });
         await JSRuntime.InvokeAsync<string>("saveFile", "receipt.txt", booking.payment.GetReceipt());

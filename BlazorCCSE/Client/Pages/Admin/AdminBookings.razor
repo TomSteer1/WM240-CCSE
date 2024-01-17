@@ -46,7 +46,7 @@
                             <td>@b.depositPaid</td>
                             <td>£@b.totalPaid</td>
                             <td>£@(b.totalCost - b.totalPaid)</td>
-                            <td><button @onclick='() => NavigationManager.NavigateTo($"/bookings/hotel/{b.id}")'>Open</button></td>
+                            <td><button class="btn btn-primary" @onclick='() => NavigationManager.NavigateTo($"/bookings/hotel/{b.id}")'>Open</button></td>
                         </tr>
                     }
                 </tbody>

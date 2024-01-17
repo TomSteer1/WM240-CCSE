@@ -11,8 +11,8 @@
     NavigationManager.NavigateTo("/hotels");
 } else
 {
-    <PageTitle>Book Hotel</PageTitle>
-    <h1>Book a hotel</h1>
+    <PageTitle>Book Package</PageTitle>
+    <h1>Book a Package</h1>
     if (hotel is null || tour is null)
     {
         <p><em>Loading...</em></p>
@@ -48,8 +48,8 @@
        </EditForm>
         <h3>Hotel Cost: @booking.hotelBooking.totalCost</h3>
         <h3>Tour Cost: @booking.tourBooking.totalCost</h3>
-        <h3>Discount : @(dicount * 100)%</h3>
         <h3>Sub total: @subTotal</h3>
+        <h3>Discount : @(dicount * 100)%</h3>
         <h3>Total Cost: @total</h3>
 
         @if (bookingAvailable & aVchecked)
@@ -213,17 +213,17 @@
         }
         booking.payment.items = booking.payment.items.Append(new PaymentItem
             {
-                Name = hotel.name + " deposit",
+                name = hotel.name + " deposit",
                 cost = booking.hotelBooking.totalCost * 0.2m
             });
         booking.payment.items = booking.payment.items.Append(new PaymentItem
             {
-                Name = tour.name + " deposit",
+                name = tour.name + " deposit",
                 cost = booking.tourBooking.totalCost * 0.2m
             });
         booking.payment.items = booking.payment.items.Append(new PaymentItem
             {
-                Name = "Package discount",
+                name = "Package discount",
                 cost = total * 0.2m
             });
         await JSRuntime.InvokeAsync<string>("saveFile", "receipt.txt", booking.payment.GetReceipt());

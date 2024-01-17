@@ -8,8 +8,8 @@ namespace BlazorCCSE.Shared
 {
     public class PaymentItem
     {
-        public string Id { get; set; } = Guid.NewGuid().ToString();
-        public string Name { get; set; } = "";
+        public string id { get; set; } = Guid.NewGuid().ToString();
+        public string name { get; set; } = "";
         public decimal cost { get; set; } = 0;
         public int quantity { get; set; } = 1;
     }

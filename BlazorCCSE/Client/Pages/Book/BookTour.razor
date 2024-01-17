@@ -161,7 +161,7 @@
         Console.WriteLine(booking.payment.amount);
         booking.payment.items = booking.payment.items.Append(new PaymentItem
             {
-                Name = tour.name + " deposit",
+                name = tour.name + " deposit",
                 cost = tour.cost * 0.2m,
                 quantity = booking.people
             });

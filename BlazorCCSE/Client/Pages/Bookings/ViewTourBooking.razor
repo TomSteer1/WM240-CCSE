@@ -1,6 +1,7 @@
 ﻿@page "/bookings/tour/{id}"
 @inject NavigationManager NavigationManager
 @inject HttpClient Http
+@inject IJSRuntime JSRuntime
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @using BlazorCCSE.Shared
@@ -89,6 +90,12 @@
         payment.bookingID = tourBooking!.id;
         await Http.PostAsJsonAsync<Payment>("api/booking/tour/pay", payment);
         tourBooking = await Http.GetFromJsonAsync<TourBooking>($"api/booking/tour/get/{Id}");
+        payment.items = payment.items.Append(new PaymentItem
+            {
+                name = tourBooking.tour.name + " payment",
+                cost = payment.amount
+            });
+        await JSRuntime.InvokeAsync<string>("saveFile", "receipt.txt", payment.GetReceipt());
         processing = false;
         payment = new Payment();
         StateHasChanged();

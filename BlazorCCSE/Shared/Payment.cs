@@ -49,7 +49,7 @@ namespace BlazorCCSE.Shared
             receipt += "Pacific Tours\n\n";
             foreach(PaymentItem item in items)
             {
-                receipt += item.Name + " x " + item.quantity + " - £" + (item.cost * item.quantity) + "\n";
+                receipt += item.name + " x " + item.quantity + " - £" + (item.cost * item.quantity) + "\n";
             }
             receipt += "\nTotal : £" + amount;
             return receipt;

@@ -335,6 +335,7 @@ namespace BlazorCCSE.Server.Controllers
 
         [HttpGet]
         [Route("tour/get")]
+        [Authorize(Roles="admin")]
         public async Task<List<TourBooking>> GetTourBookings()
         {
             var bookings = await _context.TourBookings.ToListAsync<TourBooking>();
@@ -355,6 +356,7 @@ namespace BlazorCCSE.Server.Controllers
 
         [HttpGet]
         [Route("hotel/get")]
+        [Authorize(Roles = "admin")]
         public async Task<List<HotelBooking>> GetHotelBookings()
         {
             var bookings = await _context.HotelBookings.ToListAsync<HotelBooking>();
@@ -374,6 +376,7 @@ namespace BlazorCCSE.Server.Controllers
 
         [HttpGet]
         [Route("package/get")]
+        [Authorize(Roles = "admin")]
         public async Task<List<PackageBooking>> GetPackageBookings()
         {
             var bookings = await _context.PackageBookings.ToListAsync<PackageBooking>();
@@ -486,7 +489,7 @@ namespace BlazorCCSE.Server.Controllers
                 return BadRequest();
             }
             // Check the payment is valid
-            if (!payment.Validate() || payment.amount > booking.totalCost)
+            if (!payment.Validate() || payment.amount > booking.totalCost - booking.totalPaid)
             {
                 return BadRequest();
             }

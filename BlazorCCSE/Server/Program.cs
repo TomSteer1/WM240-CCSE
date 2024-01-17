@@ -19,6 +19,9 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = false).AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
 
+// Increase the password hashing work factor to 600 (from 100)
+builder.Services.Configure<PasswordHasherOptions>(options => options.IterationCount = 600_000);
+
 builder.Services.AddAuthentication()
     .AddIdentityServerJwt();
 
