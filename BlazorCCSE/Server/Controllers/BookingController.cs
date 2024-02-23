@@ -206,13 +206,14 @@ namespace BlazorCCSE.Server.Controllers
             {
                 return null;
             }
+            int bookingLength = (booking.endDate - booking.startDate).Days;
             HotelBooking hotelBooking = new HotelBooking();
             hotelBooking.hotelID = requestedHotel.id;
             hotelBooking.startDate = booking.startDate.Date;
             hotelBooking.endDate = booking.endDate.Date;
-            hotelBooking.totalCost = requestedHotel.GetPrice(booking.roomType);
+            hotelBooking.totalCost = requestedHotel.GetPrice(booking.roomType) * bookingLength;
             hotelBooking.depositPaid = true;
-            hotelBooking.totalPaid = requestedHotel.GetPrice(booking.roomType) * (decimal)0.2;
+            hotelBooking.totalPaid = requestedHotel.GetPrice(booking.roomType) * bookingLength * (decimal)0.2;
             hotelBooking.roomType = booking.roomType;
             hotelBooking.hotel = requestedHotel;
             hotelBooking.userID = currentUser.GetSubjectId();
@@ -315,9 +316,9 @@ namespace BlazorCCSE.Server.Controllers
                 userID = currentUser.GetSubjectId(),
                 forename = user.forename,
                 surname = user.surname,
-                totalCost = ((requestedTour.cost * booking.tourBooking.people) + requestedHotel.GetPrice(booking.hotelBooking.roomType)) * (1 - discount),
+                totalCost = ((requestedTour.cost * booking.tourBooking.people) + (requestedHotel.GetPrice(booking.hotelBooking.roomType) * requestedTour.length)) * (1 - discount),
                 depositPaid = true,
-                totalPaid = (requestedHotel.GetPrice(booking.hotelBooking.roomType) + (requestedTour.cost * booking.tourBooking.people)) * (1 - discount) * 0.2m,
+                totalPaid = ((requestedTour.cost * booking.tourBooking.people) + (requestedHotel.GetPrice(booking.hotelBooking.roomType) * requestedTour.length)) * (1 - discount) * 0.2m,
                 startDate = booking.startDate.Date,
                 endDate = booking.endDate.Date,
                 hotelBookingID = hotelBooking.id,
@@ -694,6 +695,41 @@ namespace BlazorCCSE.Server.Controllers
             _context.HotelBookings.Remove(hotelBooking);
             await _context.SaveChangesAsync();
             return Ok();
+        }
+
+        [HttpPost]
+        [Route("hotel/edit")]
+        public async Task<HotelBooking> EditBooking(HotelBooking booking)
+        {
+            if (booking == null)
+            {
+                return null;
+            }
+            // Get the user
+            ClaimsPrincipal currentUser = this.User;
+            ApplicationUser user = await _userManager.FindByIdAsync(currentUser.GetSubjectId());
+            if (user == null)
+            {
+                return null;
+            }
+            HotelBooking reqBooking = await _context.HotelBookings.FirstOrDefaultAsync<HotelBooking>(i => i.id == booking.id);
+            if (reqBooking == null || reqBooking.userID != currentUser.GetSubjectId())
+            {
+                return null;
+            }
+            // Prevent people from paying/cancelling a booking linked to a package
+            if (reqBooking.packageID != null)
+            {
+                return null;
+            }
+            // Check the booking is in more than 14 days
+            if (reqBooking.startDate < System.DateTime.Now.Date.AddDays(14))
+            {
+                return null;
+            }
+            // Check 
+
+            return null;
         }
     }
 }
