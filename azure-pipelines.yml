@@ -37,6 +37,6 @@ steps:
   inputs:
     azureSubscription: 'Azure for Students(edde7550-1320-4ed3-8cbd-105b941942d9)'
     appType: 'webApp'
-    appName: 'CCSE'
+    appName: 'CCSE-2232261'
     package: '$(System.DefaultWorkingDirectory)/**/*.zip'
     deploymentMethod: 'auto'
