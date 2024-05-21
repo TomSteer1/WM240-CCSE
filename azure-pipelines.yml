@@ -33,10 +33,10 @@ steps:
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
 
-- task: AzureWebApp@1
+- task: AzureRmWebAppDeployment@4
   inputs:
+    ConnectionType: 'AzureRM'
     azureSubscription: 'Azure for Students(edde7550-1320-4ed3-8cbd-105b941942d9)'
     appType: 'webApp'
-    appName: 'CCSE-2232261'
-    package: '$(build.artifactStagingDirectory)\WebApp.zip'
-    deploymentMethod: 'auto'
+    WebAppName: 'CCSE-2232261'
+    packageForLinux: '$(build.artifactStagingDirectory)\WebApp.zip'
