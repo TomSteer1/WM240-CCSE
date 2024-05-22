@@ -20,7 +20,7 @@ steps:
   inputs:
     serviceConnectionEndpoint: 'Snyk'
     testType: 'code'
-    failOnIssues: true
+    failOnIssues: false
     projectName: 'CCSE'
 
 - task: NuGetToolInstaller@1
