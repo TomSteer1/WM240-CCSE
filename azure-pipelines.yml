@@ -46,5 +46,5 @@ steps:
     ConnectionType: 'AzureRM'
     azureSubscription: 'Azure for Students(edde7550-1320-4ed3-8cbd-105b941942d9)'
     appType: 'webApp'
-    WebAppName: '2232261-CCSE'
+    WebAppName: '2232261-ccse'
     packageForLinux: '$(build.artifactStagingDirectory)\WebApp.zip'
