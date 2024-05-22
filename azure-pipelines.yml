@@ -15,6 +15,14 @@ pool:
   name: Default
 
 steps:
+
+- task: SnykSecurityScan@1
+  inputs:
+    serviceConnectionEndpoint: 'Snyk'
+    testType: 'code'
+    failOnIssues: true
+    projectName: 'CCSE'
+
 - task: NuGetToolInstaller@1
 
 - task: NuGetCommand@2
