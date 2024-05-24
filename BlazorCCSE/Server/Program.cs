@@ -2,6 +2,7 @@ using BlazorCCSE.Server.Data;
 using BlazorCCSE.Server.Models;
 using Duende.IdentityServer.Services;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.Server.IISIntegration;
@@ -26,8 +27,13 @@ builder.Services.AddServerSideBlazor().AddCircuitOptions(options => { options.De
 // Increase the password hashing work factor to 600 (from 100)
 builder.Services.Configure<PasswordHasherOptions>(options => options.IterationCount = 600_000);
 
-builder.Services.AddAuthentication()
-    .AddIdentityServerJwt();
+// SameSite Cookie
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.Cookie.SameSite = SameSiteMode.Strict;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    }).AddIdentityServerJwt();
 
 builder.Services.AddIdentityServer()
     .AddApiAuthorization<ApplicationUser, ApplicationDbContext>(options =>
