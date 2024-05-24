@@ -3,6 +3,7 @@ on:
   push:
     branches:
     - master
+
 env:
   AZURE_WEBAPP_NAME: BlazorCCSEServer
   AZURE_WEBAPP_PACKAGE_PATH: BlazorCCSE\Server\published
@@ -20,6 +21,8 @@ jobs:
         dotnet-version: ${{ env.DOTNET_CORE_VERSION }}
     - name: Restore dependencies
       run: dotnet restore "${{ env.WORKING_DIRECTORY }}"
+    - name: List directory
+      run: ls 
     - name: Snyk test
       uses: snyk/actions/dotnet@master
       continue-on-error: true
