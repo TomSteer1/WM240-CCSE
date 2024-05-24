@@ -26,19 +26,17 @@ jobs:
       run: dotnet restore "${{ env.WORKING_DIRECTORY }}"
     - name: Snyk test
       uses: snyk/actions/dotnet@master
-      continue-on-error: true
       env:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       with: 
         args: --all-projects
     - name: Snyk Code
       uses: snyk/actions/dotnet@master
-      continue-on-error: true 
       env:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       with:
         command: code test
-        args: --all-projects
+        args: --all-projects --severity-threshold=medium
 
   build:
     needs: snyk
@@ -83,9 +81,6 @@ jobs:
     needs: [snyk, build, deploy]
     steps:
     - name: Run Zap Scan
-      uses: zaproxy/action-full-scan@v0.1.0
+      uses: zaproxy/action-full-scan@v0.10.0
       with:
         target: "https://blazorccse.azurewebsites.net"
-        report: "true"
-        report-type: "html"
-        report-name: "zap-report.html"
