@@ -24,8 +24,6 @@ jobs:
         dotnet-version: ${{ env.DOTNET_CORE_VERSION }}
     - name: Restore dependencies
       run: dotnet restore "${{ env.WORKING_DIRECTORY }}"
-    - name: List directory
-      run: ls 
     - name: Snyk test
       uses: snyk/actions/dotnet@master
       continue-on-error: true
