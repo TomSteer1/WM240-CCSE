@@ -4,6 +4,9 @@ on:
     branches:
     - master
 
+permissions:
+  actions: read
+
 env:
   AZURE_WEBAPP_NAME: BlazorCCSEServer
   AZURE_WEBAPP_PACKAGE_PATH: BlazorCCSE\Server\published
