@@ -5,7 +5,8 @@ on:
     - master
 
 permissions:
-  actions: read
+  pull-requests: write
+  issues: write
 
 env:
   AZURE_WEBAPP_NAME: BlazorCCSEServer
