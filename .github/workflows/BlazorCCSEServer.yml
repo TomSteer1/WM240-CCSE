@@ -22,6 +22,10 @@ jobs:
       run: dotnet restore "${{ env.WORKING_DIRECTORY }}"
     - name: Build
       run: dotnet build "${{ env.WORKING_DIRECTORY }}" --configuration ${{ env.CONFIGURATION }} --no-restore
+    - name: Echo Working Directory
+      run: echo ${{ env.WORKING_DIRECTORY }}
+    - name: Copy Files
+      run: cp -r ${{ env.WORKING_DIRECTORY }}/wwwroot ${{ env.WORKING_DIRECTORY }}/wwwroot
     - name: Test
       run: dotnet test "${{ env.WORKING_DIRECTORY }}" --no-build
     - name: Publish

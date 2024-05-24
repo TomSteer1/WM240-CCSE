@@ -19,6 +19,8 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = false).AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
 
+builder.Services.AddServerSideBlazor().AddCircuitOptions(options => { options.DetailedErrors = true; });
+
 // Increase the password hashing work factor to 600 (from 100)
 builder.Services.Configure<PasswordHasherOptions>(options => options.IterationCount = 600_000);
 
@@ -26,12 +28,13 @@ builder.Services.AddAuthentication()
     .AddIdentityServerJwt();
 
 builder.Services.AddIdentityServer()
-    .AddApiAuthorization<ApplicationUser, ApplicationDbContext>(options => {
+    .AddApiAuthorization<ApplicationUser, ApplicationDbContext>(options =>
+    {
         options.IdentityResources["openid"].UserClaims.Add("name");
         options.ApiResources.Single().UserClaims.Add("name");
         options.IdentityResources["openid"].UserClaims.Add("role");
         options.ApiResources.Single().UserClaims.Add("role");
-    });
+    }).AddDeveloperSigningCredential();
 
 builder.Services.AddTransient<IProfileService, ProfileService>();
 
@@ -52,12 +55,13 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
+    app.UseWebAssemblyDebugging();
     app.UseExceptionHandler("/Error");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 app.UseBlazorFrameworkFiles();
 app.UseStaticFiles();
