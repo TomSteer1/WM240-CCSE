@@ -83,4 +83,4 @@ jobs:
     - name: Run Zap Scan
       uses: zaproxy/action-full-scan@v0.10.0
       with:
-        target: "https://blazorccse.azurewebsites.net"
+        target: "https://blazorccseserver.azurewebsites.net"
