@@ -79,3 +79,15 @@ jobs:
         app-name: ${{ env.AZURE_WEBAPP_NAME }}
         publish-profile: ${{ secrets.BlazorCCSEServer_E266 }}
         package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+
+  post-test:
+    runs-on: ubuntu-latest
+    needs: [snyk, build, deploy]
+    steps:
+    - name: Run Zap Scan
+      uses: zaproxy/action-full-scan@v0.1.0
+      with:
+        target: "https://blazorccse.azurewebsites.net"
+        report: "true"
+        report-type: "html"
+        report-name: "zap-report.html"
