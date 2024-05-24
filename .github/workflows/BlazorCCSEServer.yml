@@ -28,11 +28,11 @@ jobs:
       with: 
         args: --all-projects
     - name: Snyk Code
-      uses: snyk/actions/code@master
+      uses: snyk/actions/docker@master
       env:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       with:
-        args: --all-projects --severity-threshold=medium
+        args: code test --all-projects --severity-threshold=medium
 
   build:
     needs: snyk
