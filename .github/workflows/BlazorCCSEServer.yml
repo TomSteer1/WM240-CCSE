@@ -21,22 +21,29 @@ jobs:
         dotnet-version: ${{ env.DOTNET_CORE_VERSION }}
     - name: Restore dependencies
       run: dotnet restore "${{ env.WORKING_DIRECTORY }}"
-    - name: List directory
-      run: ls 
     - name: Snyk test
       uses: snyk/actions/dotnet@master
       continue-on-error: true
       env:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       with: 
-        args: --all-projects
+        args: --all-projects --sarif
+    - name: Upload Snyk test results
+      uses: github/codeql-action/upload-sarif@v1
+      with:
+        sarif_file: snyk.sarif
     - name: Snyk Code
       uses: snyk/actions/dotnet@master
       env:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      continue-on-error: true
       with:
         command: code test
-        args: --all-projects --severity-threshold=medium
+        args: --all-projects --sarif
+    - name: Upload Snyk Code results
+      uses: github/codeql-action/upload-sarif@v1
+      with:
+        sarif_file: snyk.sarif
 
   build:
     needs: snyk
