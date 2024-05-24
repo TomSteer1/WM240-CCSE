@@ -26,6 +26,12 @@ jobs:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       with: 
         args: --all-projects
+    - name: Snyk Code
+      uses: snyk/actions/code@master
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      with:
+        args: --all-projects
 
   build:
     needs: snyk
