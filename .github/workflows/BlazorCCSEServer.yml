@@ -10,6 +10,18 @@ env:
   DOTNET_CORE_VERSION: 7.0.x
   WORKING_DIRECTORY: BlazorCCSE\Server
 jobs:
+  snyk:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Snyk
+      uses: snyk/actions/dotnet@master
+      with:
+        project-name: BlazorCCSEServer
+        target-file: BlazorCCSE/Server/BlazorCCSE.Server.csproj
+        monitor: true
+        snyk-token: ${{ secrets.SNYK_TOKEN }}
+
   build:
     runs-on: windows-latest
     steps:
