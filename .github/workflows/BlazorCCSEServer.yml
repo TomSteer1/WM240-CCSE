@@ -32,7 +32,8 @@ jobs:
       env:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       with:
-        args: code test --all-projects --severity-threshold=medium
+        command: code
+        args: --all-projects --severity-threshold=medium
 
   build:
     needs: snyk
