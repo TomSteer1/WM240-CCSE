@@ -14,13 +14,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - name: Snyk
-      uses: snyk/actions/dotnet@master
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v3
       with:
-        project-name: BlazorCCSEServer
-        target-file: BlazorCCSE/Server/BlazorCCSE.Server.csproj
-        monitor: true
-        snyk-token: ${{ secrets.SNYK_TOKEN }}
+        dotnet-version: ${{ env.DOTNET_CORE_VERSION }}
+    - name: Restore dependencies
+      run: dotnet restore "${{ env.WORKING_DIRECTORY }}"
+    - name: Snyk test
+      uses: snyk/actions/dotnet@master
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
   build:
     runs-on: windows-latest
