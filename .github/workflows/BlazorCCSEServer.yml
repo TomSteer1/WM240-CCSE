@@ -28,7 +28,7 @@ jobs:
       with: 
         args: --all-projects
     - name: Snyk Code
-      uses: snyk/actions/docker@master
+      uses: snyk/actions/dotnet@master
       env:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       with:
