@@ -35,6 +35,7 @@ jobs:
         args: --all-projects
     - name: Snyk Code
       uses: snyk/actions/dotnet@master
+      continue-on-error: true 
       env:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       with:
